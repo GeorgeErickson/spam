@@ -1,5 +1,5 @@
 from stores.redis_store import KeyValueStore
-import chunker, os
+import chunker, os, argparse, sys
 
 def token_weight(word, store):
     prob_in_spam = float(store.get(word, default=0, namespace='spam'))
@@ -19,9 +19,10 @@ def token_weight(word, store):
 def is_spam(msg_string, store):
     """
     Avg weights:
-    spam - 42.0348596581
-    easy_ham - 24.4390063052
-    hard_ham - 40.5205994778
+    spam - ?
+    spam 2 - ? 
+    easy_ham - ?
+    hard_ham - ?
     """
     
     avg = 0
@@ -29,14 +30,17 @@ def is_spam(msg_string, store):
         avg += token_weight(word[0], store)
     return (avg / total)
 
-
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Calculate average weights')
+    parser.add_argument('--dir', dest='dir', type=str)
+    args = parser.parse_args()
+    if args.dir:
+        store = KeyValueStore()
+        avgg = 0
+        c = 0.0
+        for infile in os.listdir(args.dir):
+            with open(os.path.join(args.dir,infile)) as f:
+                avgg += is_spam(f.read(), store)
+                c += 1
+        print avgg / c
  
-path = '/Users/gerickson/Desktop/spam/'
-store = KeyValueStore()
-avgg = 0
-c = 0.0
-for infile in os.listdir(path):
-    with open(os.path.join(path,infile)) as f:
-        avgg += is_spam(f.read(), store)
-        c += 1
-print avgg / c

@@ -9,6 +9,9 @@ class TrainWordFreq(MRJob):
     Generates a list of token, count pairs as tsv.
     Done as a map reduce job so that its crazy fast.
     """
+    def configure_options(self):
+        super(TrainWordFreq, self).configure_options()
+
     def emit_tokens(self, _, line):
         return chunker.chunk_by_word(line)
     
@@ -28,7 +31,7 @@ class TrainWordFreq(MRJob):
         
         #compute the probability
         for token, count in token_counts_2:
-            yield token, (count / float(total))
+            yield token, (count / float(total) * 10000)
             
     def steps(self):
         return [
@@ -40,21 +43,5 @@ class TrainWordFreq(MRJob):
                 reducer=self.prob_tokens
             )]
     
-def run_job(infile, namespace):
-    mr_job = TrainWordFreq(args=[infile,])
-    with mr_job.make_runner() as runner:
-        runner.run()
-        for line in runner.stream_output():
-            key, value = mr_job.parse_output_line(line)
-            print key
-
-
-
-parser = argparse.ArgumentParser(description='Load tsv output from train.py into a persistant store')
-parser.add_argument('--ham', type=argparse.FileType('r'))
-parser.add_argument('--spam', type=argparse.FileType('r'))
-args = parser.parse_args()
-if args.spam:
-   run_job(args.spam, namespace='spam')
-if args.ham:
-    run_job(args.ham, namespace='ham')
+if __name__ == '__main__':
+    TrainWordFreq.run()
