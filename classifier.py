@@ -19,10 +19,10 @@ def token_weight(word, store):
 def is_spam(msg_string, store):
     """
     Avg weights:
-    spam - ?
-    spam 2 - ? 
-    easy_ham - ?
-    hard_ham - ?
+    spam - 40.9149477958
+    spam 2 - 41.9583589197 
+    easy_ham - 21.6706759094
+    hard_ham - 41.0932577021
     """
     
     avg = 0
@@ -40,7 +40,9 @@ if __name__ == "__main__":
         c = 0.0
         for infile in os.listdir(args.dir):
             with open(os.path.join(args.dir,infile)) as f:
-                avgg += is_spam(f.read(), store)
+                weight = is_spam(f.read(), store)
+                avgg += weight
+                print weight
                 c += 1
-        print avgg / c
+        print "Average: %s" % str(avgg / c)
  
